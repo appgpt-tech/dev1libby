@@ -1,0 +1,65 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ tpl .Values.servicebackend.deploymentName . }}
+  namespace: {{ tpl .Values.servicebackend.namespace . }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ tpl .Values.servicebackend.appName . }}
+  template:
+    metadata:
+      labels:
+        app: {{ tpl .Values.servicebackend.appName . }}
+    spec:
+      containers:
+        - name: appgptbackend
+          image: localhost:32000/vitejs:latest
+          ports:
+            - containerPort: {{ .Values.servicebackend.containerPort }}
+          volumeMounts:
+           - name: app-data
+             mountPath: /node_modules
+             subPath: {{ tpl .Values.servicebackend.subPathToNodeModules . }}
+           - name: app-data
+             mountPath: /app
+             subPath: {{ tpl .Values.servicebackend.subPathToApp . }}
+          env:
+            - name: NODE_ENV
+              value: {{ tpl .Values.servicebackend.NODE_ENV . | quote }}
+            - name: PORT
+              value: {{ .Values.servicebackend.containerPort | quote }}
+            - name: SUPERTOKENS_CONNECTION_URI
+              value: {{ tpl .Values.servicebackend.SUPERTOKENS_CONNECTION_URI .| quote  }}
+            - name: SUPERTOKENS_APIKEY
+              value: {{ tpl .Values.servicebackend.SUPERTOKENS_APIKEY . | quote }}
+            - name: SUPERTOKENS_APPINFO_APPNAME
+              value: {{ tpl .Values.servicebackend.SUPERTOKENS_APPINFO_APPNAME . | quote }}
+            - name: SUPERTOKENS_APPINFO_APIDOMAIN
+              value: {{ tpl .Values.servicebackend.SUPERTOKENS_APPINFO_APIDOMAIN . | quote }}
+            - name: SUPERTOKENS_APPINFO_WEBSITEDOMAIN
+              value: {{ tpl .Values.servicebackend.SUPERTOKENS_APPINFO_WEBSITEDOMAIN . | quote  }}
+            - name: SUPERTOKENS_APPINFO_APIBASEPATH
+              value: {{ tpl .Values.servicebackend.SUPERTOKENS_APPINFO_APIBASEPATH . | quote }}
+            - name: SUPERTOKENS_APPINFO_WEBSITEBASEPATH
+              value: {{ tpl .Values.servicebackend.SUPERTOKENS_APPINFO_WEBSITEBASEPATH . | quote }}
+            - name: SUPERTOKENS_GITHUB_CLIENTID
+              value: {{ tpl .Values.servicebackend.SUPERTOKENS_GITHUB_CLIENTID . | quote }}
+            - name: SUPERTOKENS_GITHUB_CLIENTSECRET
+              value: {{ tpl .Values.servicebackend.SUPERTOKENS_GITHUB_CLIENTSECRET . | quote }}
+            - name: SUPERTOKENS_DISABLE
+              value: {{ .Values.servicebackend.SUPERTOKENS_DISABLE | quote }}
+            - name: CORS_ALLOWEDORIGINS
+              value: {{ tpl .Values.servicebackend.CORS_ALLOWEDORIGINS . | quote }}
+            - name: POSTGREST_URL
+              value: {{ tpl .Values.servicebackend.POSTGREST_URL . | quote }}
+            - name: POSTGRESQL_CONFIGURATION
+              value: {{ tpl .Values.servicebackend.POSTGRESQL_CONFIGURATION . | quote }}
+            - name: APIBASEPATH
+              value: {{ tpl .Values.servicebackend.APIBASEPATH . | quote }}
+          imagePullPolicy: Always
+      volumes:
+      - name: app-data
+        hostPath:
+            path: /var/microk8s/volumes/jenkins/shared/apps/

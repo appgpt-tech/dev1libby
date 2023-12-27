@@ -1,0 +1,99 @@
+
+
+
+  replicaCount: 2
+  envName: 'dev1'
+  appName: 'libby'
+  servicepostgres:
+    name: 'all-01-postgres-service.default'
+    port: 5432
+    database: 'app_{{ .Values.envName }}_{{ .Values.appName }}'
+  servicepostgrest:
+    name: '01-postgrest'
+    namespace: 'apps-{{ .Values.envName }}'
+    appName: '{{ .Values.appName }}-{{ .Values.servicepostgrest.name }}'
+    deploymentName: '{{ .Values.appName }}-{{ .Values.servicepostgrest.name }}-pod'
+    serviceName:  '{{ .Values.appName }}-{{ .Values.servicepostgrest.name }}-service'
+    port: 9000
+    containerPort: 3000
+    PGRST_DB_URI: 'postgres://nicolas:postgres@{{ .Values.servicepostgres.name }}:{{ .Values.servicepostgres.port }}/app_{{ .Values.envName }}_{{ .Values.appName }}'
+    PGRST_DB_SCHEMA: 'public'
+    PGRST_DB_ANON_ROLE: 'web_anon'
+    PGRST_LOG_LEVEL: 'info'
+  servicesupertokens:
+    name: '02-supertokens'
+    namespace: 'apps-{{ .Values.envName }}'
+    appName: '{{ .Values.appName }}-{{ .Values.servicesupertokens.name }}'
+    deploymentName: '{{ .Values.appName }}-{{ .Values.servicesupertokens.name }}-pod'
+    serviceName: '{{ .Values.appName }}-{{ .Values.servicesupertokens.name }}-service'
+    port: 3567
+    containerPort: 3567
+    POSTGRESQL_USER: 'supertokens_user'
+    POSTGRESQL_PASSWORD: 'postgres'
+    POSTGRESQL_HOST: '{{ .Values.servicepostgres.name }}'
+    POSTGRESQL_DATABASE_NAME: 'app_{{ .Values.envName }}_{{ .Values.appName }}'
+    POSTGRESQL_PORT: '{{ .Values.servicepostgres.port }}'
+    POSTGRESQL_TABLE_SCHEMA: 'supertokens'
+    API_KEYS: 'yo0xD3HPycYzHprsvCCPZevg3WIvTC0JGuGOA8L7'
+  servicebackend:
+    name: '03-backend'
+    appName: '{{ .Values.appName }}-{{ .Values.servicebackend.name }}'
+    deploymentName: '{{ .Values.appName }}-{{ .Values.servicebackend.name }}-pod'
+    serviceName: '{{ .Values.appName }}-{{ .Values.servicebackend.name }}-service'
+    ingressName: '{{ .Values.appName }}-{{ .Values.servicebackend.name }}-ingress'
+    namespace: 'apps-{{ .Values.envName }}'
+    host: '{{ .Values.envName }}.appgpt.tech'
+    imageTag: 'latest'
+    port: 3000
+    containerPort: 3000
+    subPathToApp: '{{ .Values.envName }}/{{ .Values.appName }}/backend/'
+    subPathToNodeModules: '{{ .Values.envName }}/backend-template/node_modules/'
+    NODE_ENV: '{{ .Values.envName }}'
+    SUPERTOKENS_CONNECTION_URI: 'http://{{ .Values.appName }}-{{ .Values.servicesupertokens.name }}-service:{{ .Values.servicesupertokens.port }}'
+    SUPERTOKENS_APIKEY: 'yo0xD3HPycYzHprsvCCPZevg3WIvTC0JGuGOA8L7'
+    SUPERTOKENS_APPINFO_APPNAME: '{{ .Values.appName }}'
+    SUPERTOKENS_APPINFO_APIDOMAIN: 'https://{{ .Values.envName }}.appgpt.tech'
+    SUPERTOKENS_APPINFO_WEBSITEDOMAIN: 'https://{{ .Values.envName }}.apps.appgpt.tech'
+    SUPERTOKENS_APPINFO_APIBASEPATH: '/{{ .Values.appName }}{{ .Values.servicebackend.APIBASEPATH }}/auth'
+    SUPERTOKENS_APPINFO_WEBSITEBASEPATH: '/{{ .Values.appName }}/auth'
+    SUPERTOKENS_GITHUB_CLIENTID: '3570981aa78473447b92'
+    SUPERTOKENS_GITHUB_CLIENTSECRET: 'e7e66213d4f6c4a86f1a283af913ee1c673bfcaf'
+    SUPERTOKENS_DISABLE: true
+    CORS_ALLOWEDORIGINS: 'https://{{ .Values.envName }}.apps.appgpt.tech'
+    POSTGREST_URL: 'http://{{ .Values.appName }}-{{ .Values.servicepostgrest.name }}-service:{{ .Values.servicepostgrest.port }}'
+    POSTGRESQL_CONFIGURATION: '{
+      "type": "postgres",
+      "host": "{{ .Values.servicepostgres.name }}",
+      "port": {{ .Values.servicepostgres.port }},
+      "username": "nicolas",
+      "password": "postgres",
+      "database":  "app_{{ .Values.envName }}_{{ .Values.appName }}",
+      "entitiesArray": ["src/db/**/*.ts"],
+      "logging": false,
+      "synchronize": true
+    }'
+    APIBASEPATH: '/api'
+  servicefrontend:
+    name: '04-frontend'
+    appName: '{{ .Values.appName }}-{{ .Values.servicefrontend.name }}'
+    deploymentName: '{{ .Values.appName }}-{{ .Values.servicefrontend.name }}-pod'
+    serviceName: '{{ .Values.appName }}-{{ .Values.servicefrontend.name }}-service'
+    ingressName: '{{ .Values.appName }}-{{ .Values.servicefrontend.name }}-ingress'
+    namespace: 'apps-{{ .Values.envName }}'
+    host: '{{ .Values.envName }}.apps.appgpt.tech'
+    imageTag: latest
+    port: 5173
+    containerPort: 5173
+    subPathToApp: '{{ .Values.envName }}/{{ .Values.appName }}/frontend/'
+    subPathToNodeModules: '{{ .Values.envName }}/frontend-template/node_modules/'
+    NODE_ENV: '{{ .Values.envName }}'
+    VITE_ENVIRONMENT: "DEV"    
+    VITE_BACKEND_DOMAIN: 'https://{{ .Values.envName }}.appgpt.tech'
+    VITE_BACKEND_APIPATH: '/{{ .Values.appName }}{{ .Values.servicebackend.APIBASEPATH }}'
+    VITE_USE_BACKEND_DATA: 'true'
+    VITE_SUPERTOKENS_APPNAME: '{{ .Values.appName }}'
+    VITE_SUPERTOKENS_APIDOMAIN: 'https://{{ .Values.envName }}.appgpt.tech'
+    VITE_SUPERTOKENS_WEBSITEDOMAIN: 'https://{{ .Values.envName }}.apps.appgpt.tech'
+    VITE_SUPERTOKENS_APIBASEPATH: '/{{ .Values.appName }}{{ .Values.servicebackend.APIBASEPATH }}/auth'
+    VITE_SUPERTOKENS_WEBSITEBASEPATH: '/{{ .Values.appName }}/auth'
+    VITE_SENTRY_DSN: 'https://39e605771e604c70987757084a1a1b29@o4504742345965568.ingest.sentry.io/4504742354288640'

@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ tpl .Values.servicepostgrest.serviceName . }}
+  namespace: {{ tpl .Values.servicepostgrest.namespace . }}
+spec:
+  selector:
+    app: {{ tpl .Values.servicepostgrest.appName . }}
+  ports:
+    - port: {{ .Values.servicepostgrest.port }}
+      targetPort: {{ .Values.servicepostgrest.containerPort }}

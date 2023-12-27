@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ tpl .Values.servicepostgrest.deploymentName . }}
+  namespace: {{ tpl .Values.servicepostgrest.namespace . }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ tpl .Values.servicepostgrest.appName . }}
+  template:
+    metadata:
+      labels:
+        app: {{ tpl .Values.servicepostgrest.appName . }}
+    spec:
+      containers:
+        - name: postgrest
+          image: postgrest/postgrest:v11.1.0
+          ports:
+            - containerPort: {{ .Values.servicepostgrest.containerPort }}
+          env:
+            - name: PGRST_DB_URI
+              value: {{ tpl .Values.servicepostgrest.PGRST_DB_URI . | quote }}
+            - name: PGRST_DB_SCHEMA
+              value: {{ .Values.servicepostgrest.PGRST_DB_SCHEMA | quote }}
+            - name: PGRST_DB_ANON_ROLE
+              value: {{ .Values.servicepostgrest.PGRST_DB_ANON_ROLE | quote }}
+            - name: PGRST_LOG_LEVEL
+              value: {{ .Values.servicepostgrest.PGRST_LOG_LEVEL | quote }}
+          imagePullPolicy: Always

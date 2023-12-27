@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ tpl .Values.servicesupertokens.deploymentName . }}
+  namespace: {{ tpl .Values.servicesupertokens.namespace . }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ tpl .Values.servicesupertokens.appName . }}
+  template:
+    metadata:
+      labels:
+        app: {{ tpl .Values.servicesupertokens.appName . }}
+    spec:
+      containers:
+        - name: supertokens
+          image: registry.supertokens.io/supertokens/supertokens-postgresql:7.0
+          ports:
+            - containerPort: {{ .Values.servicesupertokens.containerPort }}
+          env:
+            - name: POSTGRESQL_USER
+              value: {{ .Values.servicesupertokens.POSTGRESQL_USER | quote }}
+            - name: POSTGRESQL_PASSWORD
+              value: {{ .Values.servicesupertokens.POSTGRESQL_PASSWORD | quote }}
+            - name: POSTGRESQL_HOST
+              value: {{ tpl .Values.servicesupertokens.POSTGRESQL_HOST . | quote }}
+            - name: POSTGRESQL_DATABASE_NAME
+              value: {{ tpl .Values.servicesupertokens.POSTGRESQL_DATABASE_NAME . | quote }}
+            - name: POSTGRESQL_PORT
+              value: {{ tpl .Values.servicesupertokens.POSTGRESQL_PORT . | quote }}
+            - name: POSTGRESQL_TABLE_SCHEMA
+              value: {{ tpl .Values.servicesupertokens.POSTGRESQL_TABLE_SCHEMA . | quote  }}
+            - name: API_KEYS
+              value: {{ .Values.servicesupertokens.API_KEYS | quote }}
+          imagePullPolicy: Always

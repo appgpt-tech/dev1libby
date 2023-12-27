@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ tpl .Values.servicefrontend.deploymentName . }}
+  namespace: {{ tpl .Values.servicefrontend.namespace . }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ tpl .Values.servicefrontend.serviceName . }}
+  template:
+    metadata:
+      labels:
+        app: {{ tpl .Values.servicefrontend.serviceName . }}
+    spec:
+      containers:
+        - name: app
+          image: localhost:32000/vitejs:latest
+          ports:
+            - containerPort: {{ .Values.servicefrontend.containerPort }}
+          volumeMounts:
+           - name: app-data
+             mountPath: /node_modules
+             subPath: {{ tpl .Values.servicefrontend.subPathToNodeModules . | quote }}
+           - name: app-data
+             mountPath: /app
+             subPath: {{ tpl .Values.servicefrontend.subPathToApp . | quote }}
+          env:
+            - name: NODE_ENV
+              value: {{ tpl .Values.servicefrontend.NODE_ENV . | quote }}
+            - name: VITE_ENVIRONMENT
+              value: {{ tpl .Values.servicefrontend.VITE_ENVIRONMENT . | quote }}
+            - name: VITE_BACKEND_DOMAIN
+              value: {{ tpl .Values.servicefrontend.VITE_BACKEND_DOMAIN . | quote }}
+            - name: VITE_BACKEND_APIPATH
+              value: {{ tpl .Values.servicefrontend.VITE_BACKEND_APIPATH . | quote }}
+            - name: VITE_USE_BACKEND_DATA
+              value: {{ tpl .Values.servicefrontend.VITE_USE_BACKEND_DATA . | quote }}
+            - name: VITE_SUPERTOKENS_APPNAME
+              value: {{ tpl .Values.servicefrontend.VITE_SUPERTOKENS_APPNAME . | quote }}
+            - name: VITE_SUPERTOKENS_APIDOMAIN
+              value: {{ tpl .Values.servicefrontend.VITE_SUPERTOKENS_APIDOMAIN . | quote }}
+            - name: VITE_SUPERTOKENS_WEBSITEDOMAIN
+              value: {{ tpl .Values.servicefrontend.VITE_SUPERTOKENS_WEBSITEDOMAIN . | quote }}
+            - name: VITE_SUPERTOKENS_APIBASEPATH
+              value: {{ tpl .Values.servicefrontend.VITE_SUPERTOKENS_APIBASEPATH . | quote }}
+            - name: VITE_SUPERTOKENS_WEBSITEBASEPATH
+              value: {{ tpl .Values.servicefrontend.VITE_SUPERTOKENS_WEBSITEBASEPATH . | quote }}
+            - name: VITE_SENTRY_DSN
+              value: {{ tpl .Values.servicefrontend.VITE_SENTRY_DSN . | quote }}
+          imagePullPolicy: Always
+      volumes:
+      - name: app-data
+        hostPath:
+            path: /var/microk8s/volumes/jenkins/shared/apps/
+
+

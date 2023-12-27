@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ tpl .Values.servicesupertokens.serviceName . }}
+  namespace: {{ tpl .Values.servicesupertokens.namespace . }}
+spec:
+  selector:
+    app: {{ tpl .Values.servicesupertokens.appName . }}
+  ports:
+    - port: {{ .Values.servicesupertokens.port }}
+      targetPort: {{ .Values.servicesupertokens.containerPort }}
